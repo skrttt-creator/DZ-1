@@ -2,28 +2,11 @@
 #include "ShrdPtr.h"
 
 template <class T>
-ShrdPtr<T>::ShrdPtr()
-    : ptr(nullptr), referenceCount(nullptr) {
-}
+ShrdPtr<T>::ShrdPtr() : ptr(nullptr), referenceCount(nullptr) {}
 
 template <class T>
 ShrdPtr<T>::ShrdPtr(T* rawPtr)
-    : ptr(rawPtr), referenceCount(nullptr) {
-    if (rawPtr != nullptr) {
-        referenceCount = new size_t(1);
-        MemoryTracker::OnAlloc();
-    }
-}
-
-template <class T>
-template <class U, typename>
-ShrdPtr<T>::ShrdPtr(UnqPtr<U>&& uniquePtr)
-    : ptr(static_cast<T*>(uniquePtr.Release())), referenceCount(nullptr) {
-    if (ptr != nullptr) {
-        referenceCount = new size_t(1);
-        MemoryTracker::OnAlloc();
-    }
-}
+    : ptr(rawPtr), referenceCount(rawPtr ? new size_t(1) : nullptr) {}
 
 template <class T>
 ShrdPtr<T>::ShrdPtr(const ShrdPtr<T>& other)
@@ -59,7 +42,6 @@ void ShrdPtr<T>::Release() {
     if (referenceCount != nullptr) {
         (*referenceCount)--;
         if (*referenceCount == 0) {
-            MemoryTracker::OnFree();
             delete ptr;
             delete referenceCount;
         }
@@ -108,12 +90,6 @@ ShrdPtr<T>& ShrdPtr<T>::operator=(ShrdPtr<T>&& other) noexcept {
 }
 
 template <class T>
-ShrdPtr<T>& ShrdPtr<T>::operator=(std::nullptr_t) {
-    Release();
-    return *this;
-}
-
-template <class T>
 T& ShrdPtr<T>::operator*() const {
     if (ptr == nullptr) {
         throw NullPointerException("ShrdPtr::operator*: Dereferencing null pointer");
@@ -145,28 +121,12 @@ bool ShrdPtr<T>::IsNull() const {
 }
 
 template <class T>
-ShrdPtr<T>::operator bool() const {
-    return ptr != nullptr;
-}
-
-template <class T>
 void ShrdPtr<T>::Reset(T* newPtr) {
     if (ptr != newPtr) {
         Release();
         if (newPtr != nullptr) {
             ptr = newPtr;
             referenceCount = new size_t(1);
-            MemoryTracker::OnAlloc();
         }
     }
-}
-
-template <class T>
-bool ShrdPtr<T>::operator==(const ShrdPtr<T>& other) const {
-    return ptr == other.ptr;
-}
-
-template <class T>
-bool ShrdPtr<T>::operator!=(const ShrdPtr<T>& other) const {
-    return ptr != other.ptr;
 }

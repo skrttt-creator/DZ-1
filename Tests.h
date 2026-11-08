@@ -1,4 +1,4 @@
 #pragma once
 
-void RunAllFunctionalTests();
-void RunLoadBenchmarks(bool includeExtreme100M = false);
+void RunAllTests();
+void RunBenchmarks(bool include100M = false);

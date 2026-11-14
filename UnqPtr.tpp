@@ -1,22 +1,13 @@
 #pragma once
 #include "UnqPtr.h"
 
-// ==================== Реализация UnqPtr<T> ====================
+
 
 template <class T>
 UnqPtr<T>::UnqPtr() : ptr(nullptr) {}
 
 template <class T>
 UnqPtr<T>::UnqPtr(T* rawPtr) : ptr(rawPtr) {}
-
-template <class T>
-UnqPtr<T>::UnqPtr(const UnqPtr<T>& other)
-    : ptr(other.ptr ? new T(*other.ptr) : nullptr) {}
-
-template <class T>
-template <class U, typename>
-UnqPtr<T>::UnqPtr(const UnqPtr<U>& other)
-    : ptr(other.ptr ? static_cast<T*>(new U(*other.ptr)) : nullptr) {}
 
 template <class T>
 UnqPtr<T>::UnqPtr(UnqPtr<T>&& other) noexcept : ptr(other.ptr) {
@@ -32,25 +23,6 @@ UnqPtr<T>::UnqPtr(UnqPtr<U>&& other) noexcept : ptr(static_cast<T*>(other.ptr)) 
 template <class T>
 UnqPtr<T>::~UnqPtr() {
     delete ptr;
-}
-
-template <class T>
-UnqPtr<T>& UnqPtr<T>::operator=(const UnqPtr<T>& other) {
-    if (this != &other) {
-        delete ptr;
-        ptr = other.ptr ? new T(*other.ptr) : nullptr;
-    }
-    return *this;
-}
-
-template <class T>
-template <class U, typename>
-UnqPtr<T>& UnqPtr<T>::operator=(const UnqPtr<U>& other) {
-    if (static_cast<const void*>(this) != static_cast<const void*>(&other)) {
-        delete ptr;
-        ptr = other.ptr ? static_cast<T*>(new U(*other.ptr)) : nullptr;
-    }
-    return *this;
 }
 
 template <class T>
@@ -115,7 +87,7 @@ void UnqPtr<T>::Reset(T* newPtr) {
     }
 }
 
-// ==================== Реализация UnqPtr<T[]> ====================
+
 
 template <class T>
 UnqPtr<T[]>::UnqPtr() : ptr(nullptr) {}
